@@ -35,6 +35,7 @@ module ActionCable
         @event_loop   = event_loop
 
         @url = ClientSocket.determine_url(@env)
+        @ping_times = 0
 
         @driver = @driver_started = nil
         @close_params = ['', 1006]
@@ -50,6 +51,15 @@ module ActionCable
         @driver.on(:error)   { |e| emit_error(e.message) }
 
         @stream = ActionCable::Connection::Stream.new(@event_loop, self)
+      end
+      
+      def ping
+        return false if @ready_state > OPEN
+        @ping_times += 1
+        result = @driver.ping('pong') do
+          @ping_times = 0
+        end
+        client_gone if @ping_times > 5
       end
 
       def start_driver

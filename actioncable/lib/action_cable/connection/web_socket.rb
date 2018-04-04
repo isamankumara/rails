@@ -12,6 +12,10 @@ module ActionCable
         websocket
       end
 
+      def ping
+        websocket.ping
+      end
+
       def alive?
         websocket && websocket.alive?
       end
